@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!--【注意点：】 执行生成：mvn mybatis-generator:generate -e 多次执行会覆盖-->
+    <!-- 【注意点】：引入配置文件，不在这里写死配置 -->
+    <properties resource="mybatis-generator/mybatisGeneratorinit.properties"/>
+    <!-- 一个数据库一个context -->
+    <!--defaultModelType="flat" 大数据字段，不分表 -->
+    <context id="MysqlTables" targetRuntime="MyBatis3" defaultModelType="flat">
+        <property name="autoDelimitKeywords" value="true" />
+        <property name="beginningDelimiter" value="`" />
+        <property name="endingDelimiter" value="`" />
+        <property name="javaFileEncoding" value="utf-8" />
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin" />
+
+        <!-- 注释 -->
+        <commentGenerator >
+            <property name="suppressAllComments" value="false"/><!-- 是否取消注释 -->
+            <property name="suppressDate" value="true" /> <!-- 是否生成注释代时间戳-->
+        </commentGenerator>
+
+        <!-- jdbc连接 -->
+        <jdbcConnection driverClass="${jdbc_driver}" connectionURL="${jdbc_url}" userId="${jdbc_user}" password="${jdbc_password}" >
+            <!--【注意点】如果不写这个字段，比如生成user表的时候，会把mysql库下的user表生成-->
+            <property name="nullCatalogMeansCurrent" value="true" />
+        </jdbcConnection>
+        <!-- 类型转换 -->
+        <javaTypeResolver>
+            <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+
+        <!-- 生成实体类地址 -->
+        <javaModelGenerator targetPackage="com.example.test001.model" targetProject="${project}" >
+            <property name="enableSubPackages" value="false"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+        <!-- 生成mapxml文件 -->
+        <sqlMapGenerator targetPackage="mappers" targetProject="${resources}" >
+            <property name="enableSubPackages" value="false" />
+        </sqlMapGenerator>
+        <!-- 生成mapxml对应client，也就是接口dao -->
+        <javaClientGenerator targetPackage="com.example.test001.mapper" targetProject="${project}" type="XMLMAPPER" >
+            <property name="enableSubPackages" value="false" />
+        </javaClientGenerator>
+        <table tableName="test.user" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+            <property name="useActualColumnNames" value="false" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+        </table>
+
+    </context>
+</generatorConfiguration>
