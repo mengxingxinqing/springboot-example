@@ -15,3 +15,5 @@
 //mybatis 自动生成 根路径控制台执行
 mvn mybatis-generator:generate -e
 ```
+### 注意点
+1. mybatis自动生成，会执行覆盖
