@@ -12,6 +12,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -22,6 +24,7 @@ import java.util.logging.Logger;
 @Order(1)
 public class LogAspect {
     ThreadLocal<Long> startTime = new ThreadLocal<>();
+    ThreadLocal<ServletRequestAttributes> attributesThreadLocal = new ThreadLocal<>();
 
     private Logger logger = Logger.getLogger("log001");
 
@@ -34,23 +37,8 @@ public class LogAspect {
         startTime.set(System.currentTimeMillis());
         // 接收到请求，记录请求内容
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        if (attributes != null) {
-            HttpServletRequest request = attributes.getRequest();
-            StringBuilder sb = new StringBuilder();
-            sb.append(request.getRequestURL().toString());
-            sb.append(" || ");
-            sb.append(request.getMethod());
-            sb.append(" || ");
-            sb.append(request.getRemoteAddr());
-            sb.append(" || ");
-            sb.append(joinPoint.getSignature().getDeclaringTypeName());
-            sb.append(".");
-            sb.append(joinPoint.getSignature().getName());
-            sb.append(" || ");
-            Object[] args = joinPoint.getArgs().clone();
-            sb.append(Arrays.toString(args));
-            logger.info(sb.toString());
-        }
+        attributesThreadLocal.set(attributes);
+
     }
 
     /**
@@ -59,7 +47,27 @@ public class LogAspect {
      */
     @AfterReturning(returning = "ret", pointcut = "webLog()")
     public void doAfterReturning(Object ret) {
-        logger.info("返回内容 : " + ret);
-        logger.info("花费时间 : " + (System.currentTimeMillis() - startTime.get()) + "毫秒");
+        ServletRequestAttributes attributes = attributesThreadLocal.get();
+        if (attributes != null) {
+            HttpServletRequest request = attributes.getRequest();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(request.getHeader("traceid"));
+            sb.append(" || ");
+            sb.append(request.getRequestURI());
+            sb.append(" || ");
+            sb.append(request.getMethod());
+            sb.append(" || ");
+            try {
+                sb.append(java.net.URLDecoder.decode(request.getQueryString(), StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                sb.append("decode err");
+            }
+            sb.append(" || ");
+            sb.append(request.getRemoteAddr());
+            sb.append(" || ");
+            sb.append(System.currentTimeMillis() - startTime.get() + "ms");
+            logger.info(sb.toString());
+        }
     }
 }
