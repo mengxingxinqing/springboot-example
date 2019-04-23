@@ -1,6 +1,7 @@
 package com.example.test001.aop;
 
 
+import org.apache.logging.log4j.util.Strings;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -59,8 +60,10 @@ public class LogAspect {
             sb.append(request.getMethod());
             sb.append(" || ");
             try {
-                sb.append(java.net.URLDecoder.decode(request.getQueryString(), StandardCharsets.UTF_8.name()));
-            } catch (UnsupportedEncodingException e) {
+                if(!Strings.isEmpty(request.getQueryString())){
+                    sb.append(java.net.URLDecoder.decode(request.getQueryString(), StandardCharsets.UTF_8.name()));
+                }
+            } catch (Exception e) {
                 sb.append("decode err");
             }
             sb.append(" || ");

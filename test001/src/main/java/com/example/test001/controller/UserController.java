@@ -1,5 +1,6 @@
 package com.example.test001.controller;
 
+import com.example.test001.config.TestConfig;
 import com.example.test001.model.User;
 import com.example.test001.request.model.UserParam;
 import com.example.test001.service.UserService;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TestConfig testConfig;
 
     @RequestMapping("/get")
     @ApiOperation("根据id获取用户信息")
@@ -34,6 +38,12 @@ public class UserController {
     @ApiOperation("使用post json方式传参")
     public int addByRequestBody(@RequestBody UserParam param){
         return userService.addUser(param.toUser());
+    }
+
+    @RequestMapping("/apollo")
+    @ApiOperation("apollo测试key")
+    public String apollo(){
+        return "apollo config,key=com.example.test001.testkey,value="+testConfig.getTestkey();
     }
 
 }
