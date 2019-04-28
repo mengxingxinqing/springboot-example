@@ -24,7 +24,7 @@ public class Test {
             for(Method method : methodSet){
                 GetLine getLine = method.getAnnotation(GetLine.class);
                 System.out.println(getLine.value());
-                ReflectInterface.getMethodParam(method);
+//                ReflectInterface.getMethodParam(method);
 //                method.getParameterAnnotations()
             }
 

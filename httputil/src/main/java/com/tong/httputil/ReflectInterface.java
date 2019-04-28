@@ -39,6 +39,8 @@ public class ReflectInterface {
             if(method.isAnnotationPresent(GetLine.class)){
                 String url = method.getAnnotation(GetLine.class).value();
                 u.setName("get a user from "+dataSourceName+"/"+url);
+                Map<String,Object> paramMap = getMethodParam(method,args);
+                System.out.println("age="+paramMap.get("age"));
             }else if(method.isAnnotationPresent(PostLine.class)){
                 u.setName("get a post");
             }
@@ -49,7 +51,8 @@ public class ReflectInterface {
     }
 
 
-    public static void getMethodParam(Method method){
+    public static Map<String,Object> getMethodParam(Method method,Object[] args){
+        Map<String,Object> paramMap = new HashMap<>();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         int count = parameterAnnotations.length;
         for (int i = 0; i < count; i++) {
@@ -57,9 +60,13 @@ public class ReflectInterface {
             int paramAnnotationCount = parameterAnnotations[i].length;
             for(int j=0;j<paramAnnotationCount;j++){
                 System.out.println("p->>>>>>>>>>>"+parameterAnnotations[i][j]);
+                if(parameterAnnotations[i][j].annotationType() == Param.class){
+                    Param p = (Param) parameterAnnotations[i][j];
+                    paramMap.put(p.value(),args[i]);
+                }
             }
-
         }
+        return paramMap;
     }
 
 }
