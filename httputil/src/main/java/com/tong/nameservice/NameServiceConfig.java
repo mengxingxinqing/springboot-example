@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 
 public class NameServiceConfig {
     public String[] getHosts() {
@@ -24,6 +25,15 @@ public class NameServiceConfig {
         }
         String values = prop.getProperty("nameservice.hosts");
         hosts = values.trim().split(",");
+    }
+
+    public String getUrl(){
+        return hosts[balance(hosts.length)];
+    }
+
+    public int balance(int len){
+        Random rd = new Random();
+        return rd.nextInt(len);
     }
 
 }
