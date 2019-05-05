@@ -9,6 +9,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface DataSource {
     String name() default "";
-    String appid() default "";
-    String appsec() default "";
 }

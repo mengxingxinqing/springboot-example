@@ -1,7 +1,9 @@
 package com.tong.httputil;
 
-@DataSource(name = "/aaaa")
+import java.util.Map;
+
+@DataSource(name = "name://test001")
 public interface MyUrl {
-    @GetLine("/bbbb")
-    public User getUser(@Param("uid") String uid,@Param("age") int age);
+    @GetLine("/user/get")
+    public User getUser(@Param("id") int uid,@Header Map<String,String> header);
 }

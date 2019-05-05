@@ -1,24 +1,32 @@
 package com.tong.httputil;
 
-import com.sun.xml.internal.ws.client.sei.MethodHandler;
+import com.google.gson.Gson;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class ReflectInterface {
-    private Map<String,Object> objectMap;
     public ReflectInterface(){
-        objectMap = new HashMap<>();
     }
 
 
-    public static <T>  T getInstance(Class<T> cls){
-//        if(objectMap.containsKey(cls.toString())){
-//            return (T)objectMap.get(cls.toString());
-//        }
+    public static <T> T getInstance(Class<T> cls){
         MethodProxy invocationHandler = new MethodProxy();
         Object newProxyInstance = Proxy.newProxyInstance(
                 cls.getClassLoader(),
@@ -34,39 +42,41 @@ public class ReflectInterface {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args)  throws Throwable {
             DataSource dataSource = method.getDeclaringClass().getAnnotation(DataSource.class);
-            String dataSourceName = dataSource.name();
-            User u = new User();
+            String url = NameService.getUrlByName(dataSource.name());
             if(method.isAnnotationPresent(GetLine.class)){
-                String url = method.getAnnotation(GetLine.class).value();
-                u.setName("get a user from "+dataSourceName+"/"+url);
-                Map<String,Object> paramMap = getMethodParam(method,args);
-                System.out.println("age="+paramMap.get("age"));
-            }else if(method.isAnnotationPresent(PostLine.class)){
-                u.setName("get a post");
+                String path = method.getAnnotation(GetLine.class).value();
+                ParamStruct paramStruct = getMethodParam(method,args);
+                String respStr = HttpUtil.addSignPost(HttpUtil.combineUrl(url,path),paramStruct.getParams(),paramStruct.getHeader(),"");
+                return Decode.decode(respStr,method.getGenericReturnType());
             }
-
-            return u;
+            return null;
         }
-
     }
 
 
-    public static Map<String,Object> getMethodParam(Method method,Object[] args){
-        Map<String,Object> paramMap = new HashMap<>();
+    public static ParamStruct getMethodParam(Method method, Object[] args){
+        ParamStruct resultStruct = new ParamStruct();
+        Map<String,String> paramMap = new HashMap<>();
+        Map<String,String> headerMap = null;
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         int count = parameterAnnotations.length;
         for (int i = 0; i < count; i++) {
-//            if(parameterAnnotations[i][0].)
             int paramAnnotationCount = parameterAnnotations[i].length;
             for(int j=0;j<paramAnnotationCount;j++){
                 System.out.println("p->>>>>>>>>>>"+parameterAnnotations[i][j]);
                 if(parameterAnnotations[i][j].annotationType() == Param.class){
                     Param p = (Param) parameterAnnotations[i][j];
-                    paramMap.put(p.value(),args[i]);
-                }
+                    paramMap.put(p.value(),args[i].toString());
+                }else if(parameterAnnotations[i][j].annotationType() == Header.class
+                    && args[i] instanceof Map) headerMap = (Map<String, String>) args[i];
             }
         }
-        return paramMap;
+        resultStruct.setParams(paramMap);
+        resultStruct.setHeader(headerMap);
+        return resultStruct;
     }
+
+
+
 
 }

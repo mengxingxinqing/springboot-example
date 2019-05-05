@@ -127,7 +127,7 @@ public class Scanner {
             for (Method method : target.getMethods()) {
                 if (method.getDeclaringClass() == Object.class) {
                     continue;
-                } else if (Util.isDefault(method)) {
+                } else if (CommonUtil.isDefault(method)) {
                     System.out.println("default " + method);
                 } else {
                     if(method.isAnnotationPresent(annotation))

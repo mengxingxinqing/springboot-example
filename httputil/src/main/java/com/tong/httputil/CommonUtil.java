@@ -13,8 +13,19 @@
  */
 package com.tong.httputil;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.io.*;
 import java.lang.reflect.*;
+import java.net.URLEncoder;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -30,7 +41,7 @@ import static java.lang.String.format;
 /**
  * Utilities, typically copied in from guava, so as to avoid dependency conflicts.
  */
-public class Util {
+public class CommonUtil {
 
   /**
    * The HTTP Content-Length header field name.
@@ -72,7 +83,7 @@ public class Util {
       new Types.ParameterizedTypeImpl(null, Map.class, String.class,
           new Types.WildcardTypeImpl(new Type[] {Object.class}, new Type[0]));
 
-  private Util() { // no instances
+  private CommonUtil() { // no instances
   }
 
   /**
@@ -342,4 +353,29 @@ public class Util {
   public static boolean isBlank(String value) {
     return value == null || value.isEmpty();
   }
+
+
+  public static String urlEncodeUTF8(String s) {
+    try {
+      return URLEncoder.encode(s, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new UnsupportedOperationException(e);
+    }
+  }
+  public static String urlEncodeUTF8(Map<?,?> map) {
+    StringBuilder sb = new StringBuilder();
+    for (Map.Entry<?,?> entry : map.entrySet()) {
+      if (sb.length() > 0) {
+        sb.append("&");
+      }
+      sb.append(String.format("%s=%s",
+              urlEncodeUTF8(entry.getKey().toString()),
+              urlEncodeUTF8(entry.getValue().toString())
+      ));
+    }
+    return sb.toString();
+  }
+
+
+
 }
